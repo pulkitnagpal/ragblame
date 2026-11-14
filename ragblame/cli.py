@@ -6,6 +6,7 @@
     ragblame calibrate runs/<id>      # check the judge against a stricter model
     ragblame fix heading-chunks runs/<id>
     ragblame report runs/<id>
+    ragblame why "Is Docker Desktop free for my 300-person company?"   # diagnose one question, e.g. a complaint
 """
 from __future__ import annotations
 
@@ -90,6 +91,44 @@ def cmd_bench(args):
     print("report:", _write_report(results, run_dir))
 
 
+def cmd_why(args):
+    """Diagnose one question nobody wrote an answer key for: Claude finds the right passage first."""
+    from ragblame.diagnose import diagnose, explain
+    from ragblame.gold import find_gold
+    from ragblame.judge import judge
+    from ragblame.questions import load_questions, save_questions
+    from ragblame.types import Question
+
+    bot = _bot(args)
+    trace = bot.run(args.question, "why")
+    print(f"Bot said:\n  {trace.answer.strip()}\n")
+    gold, answer = find_gold(args.question, bot)
+    q = Question("why", args.question, args.answer or answer, gold)
+    if gold:
+        print(f"Your docs say ({gold.doc_id}):\n  {gold.quote.strip()}\n")
+    else:
+        print("Your docs don't seem to answer this.\n")
+    j = judge(q, trace.answer)
+    print(f"Judge: {j.label}: {j.reason}\n")
+    if j.label == "correct":
+        print("Nothing to diagnose: the bot got it right.")
+        return
+    verdict = diagnose(bot, q, trace, judge_fn=judge)
+    verdict.explanation, verdict.fix = explain(q, trace, verdict)
+    print("Experiments, one stage made perfect at a time:")
+    for e in verdict.experiments:
+        mark = "✓" if e.judgement.label == "correct" else "✗"
+        print(f"  {mark} {e.description} → {e.judgement.label}")
+    stages = f" ({', '.join(verdict.stages)})" if verdict.cause == "multiple" else ""
+    print(f"\nVerdict: {verdict.cause.upper()}{stages}\n\n{verdict.explanation}\n\nFix: {verdict.fix}")
+    if args.save:
+        path = Path(args.save)
+        qs = load_questions(path) if path.exists() else []
+        q.id = f"c{len([x for x in qs if x.id.startswith('c')]) + 1:03d}"
+        save_questions(qs + [q], path)
+        print(f"\nAdded to {path} as {q.id}, so every future fix is checked against it.")
+
+
 def cmd_report(args):
     from ragblame.results import load
     run_dir = Path(args.run)
@@ -135,6 +174,12 @@ def main(argv=None):
     s.add_argument("--per-fault", type=int, default=6)
     s.add_argument("--questions", default=str(QUESTIONS))
     s.set_defaults(fn=cmd_bench)
+
+    s = sub.add_parser("why", help="diagnose one question, such as a customer complaint")
+    s.add_argument("question")
+    s.add_argument("--answer", default="", help="the correct answer, if you know it (otherwise Claude reads it from the docs)")
+    s.add_argument("--save", default="", help="append the question to this test set (a .jsonl file)")
+    s.set_defaults(fn=cmd_why)
 
     s = sub.add_parser("report", help="write the HTML report for a run")
     s.add_argument("run")

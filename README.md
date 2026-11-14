@@ -113,6 +113,40 @@ What this says, honestly:
 
 The full reports from both runs are in [`examples/runs/`](examples/runs/) (download and open the HTML).
 
+## A customer says the bot was wrong
+
+You don't need an answer key. `ragblame why` asks your bot, has Claude find the passage in your docs that
+really answers the question (it must quote it verbatim, so it can't invent one), and runs the experiments.
+A real run, on a question that isn't in either test set:
+
+```
+$ ragblame why "Our IT team wants to force sign-in on our Linux developer machines. Which file path should they put registry.json at?"
+
+Bot said:
+  Based on the provided context, the specific file path for `registry.json` on Linux is not mentioned. ...
+
+Your docs say (desktop/enterprise/enforce-sign-in/methods):
+  Linux | `/usr/share/docker-desktop/registry/registry.json
+
+Judge: wrong: The bot said the Linux path is not mentioned, but the docs give /usr/share/docker-desktop/...
+
+Experiments, one stage made perfect at a time:
+  ✓ Gave the generator only the gold passage, with the same prompt → correct
+  ✓ Moved the gold chunk to the top of the reranked list → correct
+
+Verdict: RANKING
+
+The passage with the right answer was found by search (ranked 3rd), but the reranker, the step that
+reorders results, pushed it down to 6th place. Only the top 4 results were put into the prompt, so the
+chatbot never saw the Linux file path and said it wasn't mentioned. ...
+
+Fix: Use a stronger reranker (better-reranker) so the passage containing the Linux path stays in the top 4.
+```
+
+Add `--save data/questions.jsonl` to keep the complaint in your test set, so every future fix is checked
+against it. If the docs don't answer the question at all, the verdict is **docs gap**: fix the docs, not
+the bot.
+
 ## Learn RAG from this repo
 
 `docs/learn/` walks through every stage using real output from these runs:
@@ -132,6 +166,7 @@ the [Claude Code](https://claude.com/claude-code) CLI, signed in.
 ```bash
 uv sync
 uv run ragblame ask "How many image pulls does a free Docker account get?"
+uv run ragblame why "Which file path does registry.json go at on Linux?"   # diagnose one question
 uv run ragblame run                                  # answer, judge and diagnose data/questions.jsonl
 uv run ragblame fix better-reranker runs/<id>        # simulate a fix across every question
 uv run ragblame bench runs/<id>                      # break the bot on purpose, score the diagnosis
