@@ -1,0 +1,26 @@
+Docker documentation excerpts
+=============================
+
+The Markdown pages in this directory are excerpts of the Docker documentation,
+fetched from https://docs.docker.com on 2026-11-14 by scripts/fetch_docker_docs.py.
+
+Docker documentation is Copyright Docker, Inc. and contributors, and is licensed
+under the Apache License, Version 2.0 (see LICENSE in this directory, copied from
+https://github.com/docker/docs). Source repository: https://github.com/docker/docs
+
+Changes made to the original pages:
+  - The rendered Markdown of each page (served at <page-url>.md) was saved,
+    rather than the Hugo source.
+  - Any remaining Hugo shortcodes ({{< ... >}} and {{% ... %}}) were removed,
+    trailing whitespace was trimmed and runs of blank lines were collapsed.
+  - A "Source: <page-url>" line and a blank line were added at the top of each
+    page.
+  - Only a subset of pages was kept (Docker Desktop, Docker Hub, accounts,
+    subscription and billing, security, support, FAQs, get started, Scout,
+    Compose and user-facing extensions pages); release notes, security
+    announcements and the extensions SDK were left out.
+
+Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc.
+in the United States and/or other countries. This project is not affiliated with,
+sponsored by or endorsed by Docker, Inc., and no endorsement is implied. The
+Docker logo is not used.

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><title>ragblame</title><rect width="512" height="512" rx="112" fill="#14151A"/>
+<g stroke-linecap="round" stroke-width="30" fill="none">
+  <path d="M166 150h232" stroke="#4B4F59"/>
+  <path d="M166 210h176" stroke="#4B4F59"/>
+  <path d="M166 270h212" stroke="#F5A524"/>
+  <path d="M166 330h248" stroke="#4B4F59"/>
+  <path d="M166 390h132" stroke="#4B4F59"/>
+</g>
+<rect x="102" y="248" width="20" height="44" rx="10" fill="#F5A524"/></svg>

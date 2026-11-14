@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>ragblame film</title>
+<link rel="stylesheet" href="fonts/local.css"><link rel="stylesheet" href="film.css">
+<style>html,body{margin:0;background:#0D0E11;overflow:hidden}</style>
+</head><body><div id="root"></div>
+<script src="data.js"></script><script src="film.js"></script>
+<script>
+  window.film = RagblameFilm.mount(document.getElementById('root'), window.RAGBLAME_DATA);
+  const q = new URLSearchParams(location.search);
+  if (q.has('nocap')) film.captions(false);
+  window.ready = document.fonts.ready.then(() => film.seek(Number(q.get('t') || 0))).then(() => true);
+</script></body></html>

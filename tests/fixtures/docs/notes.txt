@@ -1,0 +1,1 @@
+This is not a docs page. load_docs must ignore it.

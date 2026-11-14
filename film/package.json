@@ -1,0 +1,10 @@
+{
+  "name": "ragblame-film",
+  "private": true,
+  "version": "1.0.0",
+  "description": "The ragblame launch film, logo and stills, rendered from HTML",
+  "type": "module",
+  "dependencies": {
+    "opentype.js": "^1.3.4"
+  }
+}
